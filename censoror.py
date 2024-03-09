@@ -118,6 +118,13 @@ if __name__ == "__main__":
     args = parse_args()
     output_directory_name = args.output
     print(output_directory_name)
+    print(f"Input files: {args.input}")
+    print(f"Output directory: {args.output}")
+    print(f"Censor names: {args.names}")
+    print(f"Censor dates: {args.dates}")
+    print(f"Censor phones: {args.phones}")
+    print(f"Censor address: {args.address}")
+    print(f"Print stats to: {args.stats}")
     output_directory = os.path.join(os.getcwd(), output_directory_name)
     os.makedirs(output_directory, exist_ok=True)
 
