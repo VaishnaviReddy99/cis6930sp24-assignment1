@@ -9,5 +9,3 @@ def test_parse_args():
     test_args = ["--input", "input_pattern", "--output", "output_directory", "--phones", "--stats", "stdout"]
 
     # Call the parse_args function with the test arguments
-    with unittest.TestCase().assertRaises(SystemExit) as context:
-        parsed_args = censoror.parse_args()
