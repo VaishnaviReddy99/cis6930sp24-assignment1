@@ -1,3 +1,4 @@
+import sys
 import argparse
 import os
 import spacy
@@ -8,7 +9,7 @@ from spacy.matcher import Matcher
 # Define the output directory name
 output_directory_name = 'output'
 unicode_char = '\u2588'
-
+statsOP = []
 
 def extract_entities(text):
     nlp = spacy.load("en_core_web_sm")  # Load spaCy model
@@ -57,7 +58,7 @@ def censor_text(filename, text):
         else:
             result_str = result_str + " " + word
     result_str = mask_phone_numbers(result_str)
-    print("File : " + filename+" No.of words censored : " , count)
+    statsOP.append("File : " + filename+" No.of words censored : " + str(count))
     return result_str
 
 
@@ -79,6 +80,18 @@ def readAllFiles():
                     destination_file.write(transformed_content)
 
     print(f"All text files recursively transformed and saved to {output_directory}")
+
+
+
+def outputStats(location):
+    op = "\n".join(statsOP)
+    if location == "stdout":
+        print(op)
+    elif location == "stderr":
+        print(op,file=sys.stderr)
+    else:
+        with open(location, 'w', encoding='utf-8') as destination_file:
+            destination_file.write(op)
 
 
 def parse_args():
@@ -109,7 +122,7 @@ def parse_args():
                       help="Censor addresses in the text files.")
 
   # Output options
-  parser.add_argument("--stats", type=str, default="stdout", choices=["stdout", "stderr"],
+  parser.add_argument("--stats", type=str, default="stdout",
                       help="Print censoring statistics (default: stdout).")
 
   return parser.parse_args()
@@ -122,5 +135,6 @@ if __name__ == "__main__":
         output_directory = os.path.join(os.getcwd(), output_directory_name)
         os.makedirs(output_directory, exist_ok=True)
         readAllFiles()
+        outputStats(args.stats)
 
 
