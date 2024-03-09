@@ -91,11 +91,11 @@ def parse_args():
   parser = argparse.ArgumentParser(description="Censor personal information in text files.")
 
   # Input arguments
-  parser.add_argument("--input", type=str, required=True,
+  parser.add_argument("--input", type=str, required=False,
                       help="Glob pattern for input text files (e.g., '*.txt').")
 
   # Output arguments
-  parser.add_argument("--output", type=str, required=True,
+  parser.add_argument("--output", type=str, required=False,
                       help="Directory to store censored output files.")
 
   # Censoring options (flags)
@@ -116,18 +116,11 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    output_directory_name = args.output
-    print(output_directory_name)
-    print(f"Input files: {args.input}")
-    print(f"Output directory: {args.output}")
-    print(f"Censor names: {args.names}")
-    print(f"Censor dates: {args.dates}")
-    print(f"Censor phones: {args.phones}")
-    print(f"Censor address: {args.address}")
-    print(f"Print stats to: {args.stats}")
-    output_directory = os.path.join(os.getcwd(), output_directory_name)
-    os.makedirs(output_directory, exist_ok=True)
 
-    readAllFiles()
+    if args.input:
+        output_directory_name = args.output
+        output_directory = os.path.join(os.getcwd(), output_directory_name)
+        os.makedirs(output_directory, exist_ok=True)
+        readAllFiles()
 
 
