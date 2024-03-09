@@ -67,7 +67,7 @@ def readAllFiles():
         for file in files:
             if file.endswith(".txt"):
                 source_path = os.path.join(root, file)
-                destination_path = os.path.join(output_directory, file + '.censored')
+                destination_path = os.path.join(output_directory, file.replace(".txt", ".censored"))
                 # Read the content of the file
                 with open(source_path, 'r', encoding='utf-8') as file_content:
                     content = file_content.read()
