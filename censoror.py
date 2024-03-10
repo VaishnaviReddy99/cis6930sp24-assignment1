@@ -85,7 +85,7 @@ def readAllFiles():
             destination_file.write(transformed_content)
 
 
-    print(f"All text files recursively transformed and saved to {output_directory}")
+    print(f"All text files recursively transformed and saved to {output_directory}",flush=True)
 
 
 
