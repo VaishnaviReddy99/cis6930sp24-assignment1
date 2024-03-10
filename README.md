@@ -22,7 +22,8 @@ Arguments:
     --names, --dates, --phones, --address: Flags to specify which entities to censor.
     --stats: Print censoring statistics to "stdout" or "stderr" or any file name
 It can be run as follows:
-![](https://github.com/VaishnaviReddy99/cis6930sp24-assignment0/blob/test/output.gif)
+
+![](https://github.com/VaishnaviReddy99/cis6930sp24-assignment1/blob/main/assignment1_results.gif)
 
 
 
