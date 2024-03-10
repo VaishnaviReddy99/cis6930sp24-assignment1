@@ -1,12 +1,17 @@
 import sys
 import argparse
 import os
+import string
 import spacy
 import shutil
 import re
 import glob
 from spacy.matcher import Matcher
 from spacy_download import load_spacy
+import nltk
+
+# Download stopwords (if not already downloaded)
+nltk.download('stopwords')
 
 
 # Define the output directory name
@@ -14,19 +19,27 @@ output_directory_name = 'output'
 unicode_char = '\u2588'
 statsOP = []
 input_pattern = ".txt"
+nlp = load_spacy("en_core_web_sm")
+
+stop_words = nltk.corpus.stopwords.words('english')
 
 def extract_entities(text):
-    nlp = load_spacy("en_core_web_sm")
     matcher = Matcher(nlp.vocab)
     name_pattern = [
-      # Option 1: First Name, Last Name
-      [{"POS": "NOUN"} | {"POS": "TITLE"} | {"TEXT": "^[A-Z]\."}, {"POS": "PROPN"}],
-      # Option 2: Full Name
-      [{"POS": "PROPN"}],  # Capture single words (full names)
+        # Option 1: First Name, Last Name (with punctuation)
+        [
+            # Option 1: More strict name with punctuation
+            {"POS": "PROPN"},  # Must be a proper noun
+            {"POS": "PROPN"} | {"ORTH": {"IN": [".", ",", "-"]}}  # Last name can have punctuation
+        ],
+            # Option 2: Full Name (with punctuation)
+        [{"ORTH": {"IN": [".", ",", "-"]}}, {"POS": "PROPN"}],  # Allow punctuation within or at the beginning of a name
+        # Option 3: Initials with Last Name (with punctuation)
     ]
+
+
     address_pattern = [
-        [{"LIKE_NUM": True}, {"IS_PUNCT": True, "OP": "?"}, {"POS": "NOUN", "OP": "?"}],  # Street number and optional punctuation
-        [{"POS": "PROPN", "OP": "+"}],  # City (at least one proper noun)
+        [{"LIKE_NUM": True}, {"ORTH": {"IN": ["St", "Rd", "Ave", "Ln", "Blvd"]}} ],       [{"POS": "PROPN", "OP": "+"}],  # City (at least one proper noun)
         [{"POS": "PROPN"} | {"POS": "GPE"}],  # Optional state or geopolitical entity
         [{"POS": "NUM", "LENGTH": 5}]  # Pincode (5 digits)
     ]
@@ -37,7 +50,6 @@ def extract_entities(text):
     doc = nlp(text)
     matches = matcher(doc)
     entities = []
-    #print(matches)
     for label, start, end,  in matches:
         span = doc[start:end]
         entities.append((label, span.text))
@@ -47,33 +59,73 @@ def mask_phone_numbers(text):
     # Define a regular expression pattern for matching phone numbers
     local_pattern = re.compile(r'^\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4}$')
     # Replace phone numbers with '**'
+    pattern = r"\b\d{3} \d{3} \d{4}\b"
+    phone_num = unicode_char*3+" "+unicode_char*3+" "+unicode_char*4
     masked_text = re.sub(local_pattern, unicode_char*11, text)
-    return masked_text
+    masked_text = re.sub(pattern, phone_num, text)
+    masked = False
+    if len(masked_text) != len(text) : masked = True
 
+    return masked, masked_text
+
+
+def replace_dates(text):
+  """
+  Replaces dates in text with an asterisk (*) followed by the length of the date entity.
+  """
+  doc = nlp(text)
+  dates= []
+  count = 0
+  for ent in doc.ents:
+      if ent.label_ == "DATE":
+          dates.append(ent.text)
+  for date in dates:
+      if checkForStopWord(date):
+          continue
+      text.replace(date, unicode_char*len(date))
+      count = count + 1
+
+  return text,count
+
+def preprocess_text(text):
+    punc_to_remove = r'[!"#$%&\'()*+,./:;<=>?@\\^`{|}~_-]'  # Characters to remove
+    preprocessed_text = re.sub(punc_to_remove, ' ', text)
+    return preprocessed_text
 def censor_text(filename, text):
-    entities = extract_entities(text)
-    entity_set = {entity for label, entity in entities}
-    result_str = ""
+    preprocossedtext = preprocess_text(text)
+    entities = extract_entities(preprocossedtext)
+    result_str = text
     count = 0
-    for word in text.split(" "):
-        if word in entity_set:
+    stop_recog = 0
+    for label, entity_text in entities:
+        entity_words = entity_text.split(" ")
+        for entity_word in entity_words:
+            if checkForStopWord(entity_word) :
+                stop_recog = stop_recog +1
+                continue
+            result_str = result_str.replace(entity_word,unicode_char*len(entity_word))
             count = count + 1
-            result_str = result_str + " " + unicode_char * len(word)
-        else:
-            result_str = result_str + " " + word
-    result_str = mask_phone_numbers(result_str)
-    statsOP.append("File : " + filename+" No.of words censored : " + str(count))
-    ##print(filename)
+
+
+    masked, result_str = mask_phone_numbers(result_str)
+    phone_masked = 0
+    if masked : phone_masked = 1
+
+    result_str,date_count = replace_dates(result_str)
+    statsOP.append("File : " + filename+" \nNo.of words censored : " + str(count)+" \nNo.of phone numbers masked : "+str(phone_masked)+"\nNo.of dates masked: "+str(date_count))
     return result_str
 
+def checkForStopWord(word):
+
+    if word in stop_words or word in ["X", "Graduate", "Date", "Month","Origin","Filename","Content"]:
+        return True
+    return False
 
 def readAllFiles():
     # Iterate through all folders, subfolders, and files recursively
-   ## print(input_pattern)
     full_pattern = os.path.join(os.getcwd(), '**', input_pattern)
     matching_files = glob.glob(full_pattern, recursive=True)
 
-    ##print(matching_files)
     for file in matching_files:
         destination_path = os.path.join(output_directory, os.path.basename(file)+".censored")
         # Read the content of the file
@@ -87,7 +139,6 @@ def readAllFiles():
             destination_file.write(transformed_content)
 
 
-    ##print(f"All text files recursively transformed and saved to {output_directory}",flush=True)
 
 
 
@@ -104,11 +155,7 @@ def outputStats(location):
 
 
 def parse_args():
-  """Parses command-line arguments.
 
-  Returns:
-    A namespace object containing parsed arguments.
-  """
 
   parser = argparse.ArgumentParser(description="Censor personal information in text files.")
 
@@ -146,6 +193,3 @@ if __name__ == "__main__":
         os.makedirs(output_directory, exist_ok=True)
         readAllFiles()
         outputStats(args.stats)
-
-
-
