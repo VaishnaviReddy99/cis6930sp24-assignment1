@@ -13,7 +13,7 @@ pipenv install
 ## How to run
 Here is a sample command to run:
 
-**pipenv run python censoror.py** --input "*.txt" --output output_directory --names --dates --phones --address --stats stdout
+    pipenv run python censoror.py --input "*.txt" --output output_directory --names --dates --phones --address --stats stdout
 
 Arguments:
 
