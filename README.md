@@ -1,18 +1,24 @@
-# cis6930sp24 -- Assignment0 
+# cis6930sp24 -- Assignment1 
 
 Name: Sree Vaishnavi Madireddy
 
 UFID: 87626790
 
 # Assignment Description 
-The objective of this project is to extract predominantly tabular data from PDF files and store it in a database. Additionally, the project seeks to derive exploratory insights from the created database.
+Thid project is designed to censor personal information in text files. It leverages spaCy for entity extraction and provides options to censor names, dates, phone numbers, and addresses. The program recursively processes all text files matching a specified glob pattern, replaces sensitive information with asterisks, and outputs the censored content to new files.
 
 # How to install
 pipenv install
 
 ## How to run
-pipenv run python assignment0/main.py --incidents sample_url
+python text_censor.py --input "*.txt" --output output_directory --names --dates --phones --address --stats stdout
 
+Arguments:
+
+    --input: Glob pattern for input text files.
+    --output: Directory to store censored output files.
+    --names, --dates, --phones, --address: Flags to specify which entities to censor.
+    --stats: Print censoring statistics to "stdout" or "stderr" or any file name
 It can be run as follows:
 ![](https://github.com/VaishnaviReddy99/cis6930sp24-assignment0/blob/test/output.gif)
 
@@ -20,31 +26,19 @@ It can be run as follows:
 
 ## Functions
 #### main.py \
-parseUrl() -- This method takes each incident url and performs all the requires actions including extracting and printing results
+    extract_entities(text): Uses spaCy to extract entities (names and addresses) from the provided text.
 
-connectAndTestDB() -- This method is responsible for connecting to the in memory database and return the connection object
+    mask_phone_numbers(text): Masks phone numbers in the given text using a regular expression pattern.
 
-parseAndFetchResults() -- Responsible for quering the remote url and extracting each page from the pdf
+    censor_text(filename, text): Censors specific entities within the text, counts the number of censored words, and returns the censored text.
 
-parseEachPage() -- Parses each page and returns the extract text
+    readAllFiles(): Recursively traverses all files in the specified input directory, applies censor_text to text files, and writes the censored content to new files in the output directory.
 
-insertResultSet() -- Responsible for Inserting extracted data into the database
+    outputStats(location): Prints or writes to a file the statistics regarding the censoring process.
 
-natureTypeState() -- Responsible for printing each nature and the number of times the nature appears
+    parse_args(): Parses command-line arguments using the argparse library.
 
-## Database Development
-The Database file is in the location 'resources' and the database file is normanpd.db
-This file gets created during application runtime if not present.
 
 ## Assumptions
-a. The provided data parsing algorithm assumes a minimum of four spaces or more between each column. 
-
-b. This code has the assumption that, in the incidents data, if Location is null then Nature is also null. Both the values would     be empty
-
-c. Date/Time, Incident Number, Incident ORI cannot be null/empty
-
 
 ## Bugs
-If the incident's nature is present but the location is not, or vice versa, the script would encounter a failure, preventing it from parsing the entire data file.
-
-The result set always prints NULL Nature values wrt their count at the very last.
