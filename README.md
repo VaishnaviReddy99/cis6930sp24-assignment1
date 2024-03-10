@@ -47,11 +47,11 @@ It can be run as follows:
     outputStats(location): This function writes the collected statistics on the number of censored words per file to the specified location. It allows outputting to standard output (stdout), standard error (stderr), or a file.
 
 #### test_censoror.py \
-    checkForStopWord: This function verifies if a word is a stop word or belongs to a list of additional excluded words (e.g., "X", "Graduate", "Date"). These words are not censored during the process.
+    checkForStopWord(): This function verifies if a word is a stop word or belongs to a list of additional excluded words (e.g., "X", "Graduate", "Date"). These words are not censored during the process.
     
-    preprocess_text: This function removes punctuation characters from the provided text, preparing it for further processing.
+    preprocess_text(): This function removes punctuation characters from the provided text, preparing it for further processing.
     
-    mask_phone_numbers: This function identifies and masks phone numbers in various formats using regular expressions. It replaces them with a sequence of unicode characters.
+    mask_phone_numbers(): This function identifies and masks phone numbers in various formats using regular expressions. It replaces them with a sequence of unicode characters.
 
 
 ## Assumptions
