@@ -61,17 +61,17 @@ def censor_text(filename, text):
             result_str = result_str + " " + word
     result_str = mask_phone_numbers(result_str)
     statsOP.append("File : " + filename+" No.of words censored : " + str(count))
-    print(filename)
+    ##print(filename)
     return result_str
 
 
 def readAllFiles():
     # Iterate through all folders, subfolders, and files recursively
-    print(input_pattern)
+   ## print(input_pattern)
     full_pattern = os.path.join(os.getcwd(), '**', input_pattern)
     matching_files = glob.glob(full_pattern, recursive=True)
 
-    print(matching_files)
+    ##print(matching_files)
     for file in matching_files:
         destination_path = os.path.join(output_directory, os.path.basename(file)+".censored")
         # Read the content of the file
@@ -85,7 +85,7 @@ def readAllFiles():
             destination_file.write(transformed_content)
 
 
-    print(f"All text files recursively transformed and saved to {output_directory}",flush=True)
+    ##print(f"All text files recursively transformed and saved to {output_directory}",flush=True)
 
 
 
