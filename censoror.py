@@ -6,6 +6,8 @@ import shutil
 import re
 import glob
 from spacy.matcher import Matcher
+from spacy_download import load_spacy
+
 
 # Define the output directory name
 output_directory_name = 'output'
@@ -14,7 +16,7 @@ statsOP = []
 input_pattern = ".txt"
 
 def extract_entities(text):
-    nlp = spacy.load("en_core_web_sm")  # Load spaCy model
+    nlp = load_spacy("en_core_web_sm")
     matcher = Matcher(nlp.vocab)
     name_pattern = [
       # Option 1: First Name, Last Name
