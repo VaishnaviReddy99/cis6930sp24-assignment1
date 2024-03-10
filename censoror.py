@@ -4,12 +4,14 @@ import os
 import spacy
 import shutil
 import re
+import glob
 from spacy.matcher import Matcher
 
 # Define the output directory name
 output_directory_name = 'output'
 unicode_char = '\u2588'
 statsOP = []
+input_pattern = ".txt"
 
 def extract_entities(text):
     nlp = spacy.load("en_core_web_sm")  # Load spaCy model
@@ -59,27 +61,32 @@ def censor_text(filename, text):
             result_str = result_str + " " + word
     result_str = mask_phone_numbers(result_str)
     statsOP.append("File : " + filename+" No.of words censored : " + str(count))
+    print(filename)
     return result_str
 
 
 def readAllFiles():
     # Iterate through all folders, subfolders, and files recursively
-    for root, dirs, files in os.walk(os.getcwd()):
-        for file in files:
-            if file.endswith(".txt"):
-                source_path = os.path.join(root, file)
-                destination_path = os.path.join(output_directory, file.replace(".txt", ".censored"))
-                # Read the content of the file
-                with open(source_path, 'r', encoding='utf-8') as file_content:
-                    content = file_content.read()
+    print(input_pattern)
+    full_pattern = os.path.join(os.getcwd(), '**', input_pattern)
+    matching_files = glob.glob(full_pattern, recursive=True)
 
-                # Apply your transformation to the content (e.g., add some text)
-                transformed_content = censor_text(file, content)
-                # Write the transformed content to the destination file
-                with open(destination_path, 'w', encoding='utf-8') as destination_file:
-                    destination_file.write(transformed_content)
+    print(matching_files)
+    for file in matching_files:
+        destination_path = os.path.join(output_directory, os.path.basename(file)+".censored")
+        # Read the content of the file
+        with open(file, 'r', encoding='utf-8') as file_content:
+            content = file_content.read()
+
+        # Apply your transformation to the content (e.g., add some text)
+        transformed_content = censor_text(file, content)
+        # Write the transformed content to the destination file
+        with open(destination_path, 'w', encoding='utf-8') as destination_file:
+            destination_file.write(transformed_content)
+
 
     print(f"All text files recursively transformed and saved to {output_directory}")
+
 
 
 
@@ -131,10 +138,12 @@ if __name__ == "__main__":
     args = parse_args()
 
     if args.input:
+        input_pattern = args.input
         output_directory_name = args.output
         output_directory = os.path.join(os.getcwd(), output_directory_name)
         os.makedirs(output_directory, exist_ok=True)
         readAllFiles()
         outputStats(args.stats)
+
 
 
