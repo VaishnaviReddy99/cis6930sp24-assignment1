@@ -73,7 +73,7 @@ def readAllFiles():
 
     print(matching_files)
     for file in matching_files:
-        destination_path = os.path.join(output_directory, os.path.basename(file)+"censored")
+        destination_path = os.path.join(output_directory, os.path.basename(file)+".censored")
         # Read the content of the file
         with open(file, 'r', encoding='utf-8') as file_content:
             content = file_content.read()
