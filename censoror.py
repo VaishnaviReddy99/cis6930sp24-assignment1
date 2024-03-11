@@ -57,15 +57,14 @@ def extract_entities(text):
 
 def mask_phone_numbers(text):
     # Define a regular expression pattern for matching phone numbers
-    local_pattern = re.compile(r'^\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4}$')
+    local_pattern = re.compile(r'^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$')
     # Replace phone numbers with '**'
     pattern = r"\b\d{3} \d{3} \d{4}\b"
     phone_num = unicode_char*3+" "+unicode_char*3+" "+unicode_char*4
     masked_text = re.sub(local_pattern, unicode_char*11, text)
     masked_text = re.sub(pattern, phone_num, text)
     masked = False
-    if len(masked_text) != len(text) : masked = True
-
+    if unicode_char in masked_text : masked = True
     return masked, masked_text
 
 
@@ -137,9 +136,6 @@ def readAllFiles():
         # Write the transformed content to the destination file
         with open(destination_path, 'w', encoding='utf-8') as destination_file:
             destination_file.write(transformed_content)
-
-
-
 
 
 
